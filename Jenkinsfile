@@ -1,11 +1,19 @@
 pipeline {
-    agent any
-
-    stages {
-        stage('deploy') {
-            steps {
-                s3Upload consoleLogLevel: 'INFO', dontSetBuildResultOnFailure: false, dontWaitForConcurrentBuildCompletion: false, entries: [[bucket: '', excludedFile: '', flatten: false, gzipFiles: false, keepForever: false, managedArtifacts: false, noUploadOnFailure: false, selectedRegion: 'eu-north-1', showDirectlyInBrowser: false, sourceFile: '**/*', storageClass: 'STANDARD', uploadFromSlave: false, useServerSideEncryption: false]], pluginFailureResultConstraint: 'FAILURE', profileName: 'myprojectbucket-152', userMetadata: []
-            }
-        }
+  agent any
+  environment {
+    BUCKET_NAME = 'myprojectbucket-152'
+    REGION = 'eu-north-1'
+  }
+  stages {
+    stage('Clone') {
+      steps {
+        git 'https://github.com/jnkartikx/static-website.git'
+      }
     }
+    stage('Deploy to S3') {
+      steps {
+        sh 'aws s3 sync . s3://myprojectbucket-152 --region eu-north-1  --delete'
+      }
+    }
+  }
 }
